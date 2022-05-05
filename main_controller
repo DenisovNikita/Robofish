@@ -2,6 +2,7 @@
 #include <assert.h>
 
 const int MIDDLE_DELAY        = 2000;
+const int SMALL_DELAY         = 500;
 const int FIRST_DELTA         = 10;
 const int SECOND_DELTA        = 20;
 const int THIRD_DELTA         = 30;
@@ -28,14 +29,20 @@ void setup() {
   third.attach(4);
 }
 
-void loop() {
-  delay(MIDDLE_DELAY);
-  if (last_first_position == FIRST_LEFT_BORDER) {
-    last_first_position = FIRST_RIGHT_BORDER;
-  } else if (last_first_position == FIRST_RIGHT_BORDER) {
-    last_first_position = FIRST_LEFT_BORDER;
+void rotate(Servo *servo, int *last_position, const int LEFT_BORDER, const int RIGHT_BORDER) {
+  if (*last_position == LEFT_BORDER) {
+    *last_position = RIGHT_BORDER;
+  } else if (*last_position == RIGHT_BORDER) {
+    *last_position = LEFT_BORDER;
   } else {
     assert(0);
   }
-  first.write(last_first_position);
+  servo->write(*last_position);
+}
+
+void loop() {
+  delay(SMALL_DELAY);
+  rotate(&first, &last_first_position, FIRST_LEFT_BORDER, FIRST_RIGHT_BORDER);
+  rotate(&second, &last_second_position, SECOND_LEFT_BORDER, SECOND_RIGHT_BORDER);
+  rotate(&third, &last_third_position, THIRD_LEFT_BORDER, THIRD_RIGHT_BORDER);
 }
