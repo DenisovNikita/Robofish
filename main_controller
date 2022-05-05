@@ -1,24 +1,41 @@
 #include <Servo.h>
+#include <assert.h>
 
-const int MIDDLE_DELAY = 2000;
+const int MIDDLE_DELAY        = 2000;
+const int FIRST_DELTA         = 10;
+const int SECOND_DELTA        = 20;
+const int THIRD_DELTA         = 30;
+const int PI_DEGREES          = 90;
+const int FIRST_LEFT_BORDER   = PI_DEGREES - FIRST_DELTA;
+const int SECOND_LEFT_BORDER  = PI_DEGREES - SECOND_DELTA;
+const int THIRD_LEFT_BORDER   = PI_DEGREES - THIRD_DELTA;
+const int FIRST_RIGHT_BORDER  = PI_DEGREES + FIRST_DELTA;
+const int SECOND_RIGHT_BORDER = PI_DEGREES + SECOND_DELTA;
+const int THIRD_RIGHT_BORDER  = PI_DEGREES + THIRD_DELTA;
 
 Servo first;
 Servo second;
 Servo third;
+
+int last_first_position  = FIRST_LEFT_BORDER;
+int last_second_position = SECOND_LEFT_BORDER;
+int last_third_position  = THIRD_LEFT_BORDER;
 
 void setup() {
   Serial.begin(9600);
   first.attach(2);
   second.attach(3);
   third.attach(4);
-  delay(MIDDLE_DELAY);
-  first.write(120);
-  delay(MIDDLE_DELAY);
-  second.write(60);
-  delay(MIDDLE_DELAY);
-  third.write(20);
 }
 
 void loop() {
-  delay(500);
+  delay(MIDDLE_DELAY);
+  if (last_first_position == FIRST_LEFT_BORDER) {
+    last_first_position = FIRST_RIGHT_BORDER;
+  } else if (last_first_position == FIRST_RIGHT_BORDER) {
+    last_first_position = FIRST_LEFT_BORDER;
+  } else {
+    assert(0);
+  }
+  first.write(last_first_position);
 }
