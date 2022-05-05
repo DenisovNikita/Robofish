@@ -1,5 +1,6 @@
 #include <Servo.h>
 #include <assert.h>
+#define SETTING
 
 const int SMALL_DELAY   = 100;
 const int DEFAULT_DELAY = 500;
@@ -13,7 +14,11 @@ struct Robo_fish {
   };
 
   static const int NUM_SERVOS = 3;
-  static const int PI_DEGREES = 90;
+  const int CENTER[NUM_SERVOS] = {
+    82,
+    96,
+    88,
+  };
   const int SMALL_DELTA[NUM_SERVOS] = {
     5, 
     10, 
@@ -30,34 +35,34 @@ struct Robo_fish {
     60,
   };
   const int MIN_BORDERS_FORWARD[NUM_SERVOS] = {
-    PI_DEGREES - DEFAULT_DELTA[0],
-    PI_DEGREES - DEFAULT_DELTA[1],
-    PI_DEGREES - DEFAULT_DELTA[2],
+    CENTER[0] - DEFAULT_DELTA[0],
+    CENTER[1] - DEFAULT_DELTA[1],
+    CENTER[2] - DEFAULT_DELTA[2],
   };
   const int MAX_BORDERS_FORWARD[NUM_SERVOS] = {
-    PI_DEGREES + DEFAULT_DELTA[0],
-    PI_DEGREES + DEFAULT_DELTA[1],
-    PI_DEGREES + DEFAULT_DELTA[2],
+    CENTER[0] + DEFAULT_DELTA[0],
+    CENTER[1] + DEFAULT_DELTA[1],
+    CENTER[2] + DEFAULT_DELTA[2],
   };
   const int MIN_BORDERS_LEFT[NUM_SERVOS] = {
-    PI_DEGREES - SMALL_DELTA[0],
-    PI_DEGREES - SMALL_DELTA[1],
-    PI_DEGREES - SMALL_DELTA[2],
+    CENTER[0] - SMALL_DELTA[0],
+    CENTER[1] - SMALL_DELTA[1],
+    CENTER[2] - SMALL_DELTA[2],
   };
   const int MAX_BORDERS_LEFT[NUM_SERVOS] = {
-    PI_DEGREES + BIG_DELTA[0],
-    PI_DEGREES + BIG_DELTA[1],
-    PI_DEGREES + BIG_DELTA[2],
+    CENTER[0] + BIG_DELTA[0],
+    CENTER[1] + BIG_DELTA[1],
+    CENTER[2] + BIG_DELTA[2],
   };
   const int MIN_BORDERS_RIGHT[NUM_SERVOS] = {
-    PI_DEGREES - BIG_DELTA[0],
-    PI_DEGREES - BIG_DELTA[1],
-    PI_DEGREES - BIG_DELTA[2],
+    CENTER[0] - BIG_DELTA[0],
+    CENTER[1] - BIG_DELTA[1],
+    CENTER[2] - BIG_DELTA[2],
   };
   const int MAX_BORDERS_RIGHT[NUM_SERVOS] = {
-    PI_DEGREES + SMALL_DELTA[0],
-    PI_DEGREES + SMALL_DELTA[1],
-    PI_DEGREES + SMALL_DELTA[2],
+    CENTER[0] + SMALL_DELTA[0],
+    CENTER[1] + SMALL_DELTA[1],
+    CENTER[2] + SMALL_DELTA[2],
   };
   
   Servo servo[NUM_SERVOS];
@@ -122,10 +127,22 @@ void setup() {
   my_fish.servo[2].attach(4);
   Serial.println(SIMPLE_GREETINGS);
   Serial.flush();
+#ifdef SETTING
+  pinMode(A0, INPUT);
+#endif
 }
 
 void loop() {
   delay(SMALL_DELAY);
+#ifdef SETTING
+  int rotat = map(analogRead(A0), 0, 1023, 0, 180);
+  Serial.println(rotat);
+  Serial.flush();
+  my_fish.servo[0].write(rotat); // 82 is center
+  my_fish.servo[1].write(rotat); // 96 is center
+  my_fish.servo[2].write(rotat); // 88 is center
+  return;
+#endif SETTING
   if (Serial.available()) {
     int input = Serial.read();
     if (input != 10) { // enter button
