@@ -1,6 +1,6 @@
 #include <Servo.h>
 #include <assert.h>
-#define SETTING
+//#define SETTING
 
 const int SMALL_DELAY   = 100;
 const int DEFAULT_DELAY = 500;
