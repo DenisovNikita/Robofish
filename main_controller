@@ -1,8 +1,7 @@
 #include <Servo.h>
 #include <assert.h>
-#include <string.h>
 
-const int SMALL_DELAY  = 250;
+const int SMALL_DELAY  = 100;
 const int MIDDLE_DELAY = 500;
 const int BIG_DELAY    = 1000;
 
@@ -13,24 +12,26 @@ struct Robo_fish {
     MOVE_RIGHT,
   };
 
-  const int FIRST_DELTA         = 10;
-  const int SECOND_DELTA        = 20;
-  const int THIRD_DELTA         = 30;
-  const int PI_DEGREES          = 90;
-  const int FIRST_LEFT_BORDER   = PI_DEGREES - FIRST_DELTA;
-  const int FIRST_RIGHT_BORDER  = PI_DEGREES + FIRST_DELTA;
-  const int SECOND_LEFT_BORDER  = PI_DEGREES - SECOND_DELTA;
-  const int SECOND_RIGHT_BORDER = PI_DEGREES + SECOND_DELTA;
-  const int THIRD_LEFT_BORDER   = PI_DEGREES - THIRD_DELTA;
-  const int THIRD_RIGHT_BORDER  = PI_DEGREES + THIRD_DELTA;
+  static const int NUM_SERVOS = 3;
+  static const int PI_DEGREES = 90;
+  const int DEFAULT_DELTA[NUM_SERVOS] = {
+    10, 
+    20, 
+    30,
+  };
+  const int LEFT_BORDERS_FORWARD[NUM_SERVOS] = {
+    PI_DEGREES - DEFAULT_DELTA[0],
+    PI_DEGREES - DEFAULT_DELTA[1],
+    PI_DEGREES - DEFAULT_DELTA[2],
+  };
+  const int RIGHT_BORDERS_FORWARD[NUM_SERVOS] = {
+    PI_DEGREES + DEFAULT_DELTA[0],
+    PI_DEGREES + DEFAULT_DELTA[1],
+    PI_DEGREES + DEFAULT_DELTA[2],
+  };
   
-  Servo first;
-  Servo second;
-  Servo third;
-  
-  int last_first_position  = FIRST_LEFT_BORDER;
-  int last_second_position = SECOND_LEFT_BORDER;
-  int last_third_position  = THIRD_LEFT_BORDER;
+  Servo servo[NUM_SERVOS];
+  int pos[NUM_SERVOS];
 
   int current_state = MOVE_FORWARD;
 
@@ -46,22 +47,20 @@ struct Robo_fish {
     }
   }
 
-  void rotate(Servo *servo, int *last_position, const int LEFT_BORDER, const int RIGHT_BORDER) {
-    if (*last_position == LEFT_BORDER) {
-      *last_position = RIGHT_BORDER;
-    } else if (*last_position == RIGHT_BORDER) {
-      *last_position = LEFT_BORDER;
-    } else {
-      assert(0);
+  void rotate(Servo *servo, int *current_position, const int LEFT_BORDER, const int RIGHT_BORDER) {
+    if (*current_position != LEFT_BORDER) {
+      *current_position = LEFT_BORDER;
+    } else  {
+      *current_position = RIGHT_BORDER;
     }
-    servo->write(*last_position);
+    servo->write(*current_position);
   }
   
   void move_forward() {
     delay(MIDDLE_DELAY);
-    rotate(&first, &last_first_position, FIRST_LEFT_BORDER, FIRST_RIGHT_BORDER);
-    rotate(&second, &last_second_position, SECOND_LEFT_BORDER, SECOND_RIGHT_BORDER);
-    rotate(&third, &last_third_position, THIRD_LEFT_BORDER, THIRD_RIGHT_BORDER);
+    for (int i = 0; i < NUM_SERVOS; i++) {
+      rotate(&servo[i], &pos[i], LEFT_BORDERS_FORWARD[i], RIGHT_BORDERS_FORWARD[i]);
+    }
   }
 
   void move_left() {
@@ -84,9 +83,9 @@ int is_correct_input(int input) {
 
 void setup() {
   Serial.begin(9600);
-  my_fish.first.attach(2);
-  my_fish.second.attach(3);
-  my_fish.third.attach(4);
+  my_fish.servo[0].attach(2);
+  my_fish.servo[1].attach(3);
+  my_fish.servo[2].attach(4);
   Serial.println(GREETINGS);
   Serial.flush();
 }
