@@ -1,9 +1,9 @@
 #include <Servo.h>
 #include <assert.h>
 
-const int SMALL_DELAY  = 100;
-const int MIDDLE_DELAY = 500;
-const int BIG_DELAY    = 1000;
+const int SMALL_DELAY   = 100;
+const int DEFAULT_DELAY = 500;
+const int BIG_DELAY     = 1000;
 
 struct Robo_fish {
   enum {
@@ -14,20 +14,50 @@ struct Robo_fish {
 
   static const int NUM_SERVOS = 3;
   static const int PI_DEGREES = 90;
+  const int SMALL_DELTA[NUM_SERVOS] = {
+    5, 
+    10, 
+    15,
+  };
   const int DEFAULT_DELTA[NUM_SERVOS] = {
     10, 
     20, 
     30,
   };
-  const int LEFT_BORDERS_FORWARD[NUM_SERVOS] = {
+  const int BIG_DELTA[NUM_SERVOS] = {
+    20, 
+    40, 
+    60,
+  };
+  const int MIN_BORDERS_FORWARD[NUM_SERVOS] = {
     PI_DEGREES - DEFAULT_DELTA[0],
     PI_DEGREES - DEFAULT_DELTA[1],
     PI_DEGREES - DEFAULT_DELTA[2],
   };
-  const int RIGHT_BORDERS_FORWARD[NUM_SERVOS] = {
+  const int MAX_BORDERS_FORWARD[NUM_SERVOS] = {
     PI_DEGREES + DEFAULT_DELTA[0],
     PI_DEGREES + DEFAULT_DELTA[1],
     PI_DEGREES + DEFAULT_DELTA[2],
+  };
+  const int MIN_BORDERS_LEFT[NUM_SERVOS] = {
+    PI_DEGREES - SMALL_DELTA[0],
+    PI_DEGREES - SMALL_DELTA[1],
+    PI_DEGREES - SMALL_DELTA[2],
+  };
+  const int MAX_BORDERS_LEFT[NUM_SERVOS] = {
+    PI_DEGREES + BIG_DELTA[0],
+    PI_DEGREES + BIG_DELTA[1],
+    PI_DEGREES + BIG_DELTA[2],
+  };
+  const int MIN_BORDERS_RIGHT[NUM_SERVOS] = {
+    PI_DEGREES - BIG_DELTA[0],
+    PI_DEGREES - BIG_DELTA[1],
+    PI_DEGREES - BIG_DELTA[2],
+  };
+  const int MAX_BORDERS_RIGHT[NUM_SERVOS] = {
+    PI_DEGREES + SMALL_DELTA[0],
+    PI_DEGREES + SMALL_DELTA[1],
+    PI_DEGREES + SMALL_DELTA[2],
   };
   
   Servo servo[NUM_SERVOS];
@@ -57,22 +87,26 @@ struct Robo_fish {
   }
   
   void move_forward() {
-    delay(MIDDLE_DELAY);
     for (int i = 0; i < NUM_SERVOS; i++) {
-      rotate(&servo[i], &pos[i], LEFT_BORDERS_FORWARD[i], RIGHT_BORDERS_FORWARD[i]);
+      rotate(&servo[i], &pos[i], MIN_BORDERS_FORWARD[i], MAX_BORDERS_FORWARD[i]);
     }
   }
 
   void move_left() {
-    // TODO
+    for (int i = 0; i < NUM_SERVOS; i++) {
+      rotate(&servo[i], &pos[i], MIN_BORDERS_LEFT[i], MAX_BORDERS_LEFT[i]);
+    }
   }
 
   void move_right() {
-    // TODO
+    for (int i = 0; i < NUM_SERVOS; i++) {
+      rotate(&servo[i], &pos[i], MIN_BORDERS_RIGHT[i], MAX_BORDERS_RIGHT[i]);
+    }
   }
 };
 
 Robo_fish my_fish;
+const char SIMPLE_GREETINGS[] = "F, L or R accepts";
 const char GREETINGS[] = "Type 'F' for move forward, 'L' for move left and 'R' for move right";
 
 int is_correct_input(int input) {
@@ -86,7 +120,7 @@ void setup() {
   my_fish.servo[0].attach(2);
   my_fish.servo[1].attach(3);
   my_fish.servo[2].attach(4);
-  Serial.println(GREETINGS);
+  Serial.println(SIMPLE_GREETINGS);
   Serial.flush();
 }
 
@@ -106,6 +140,7 @@ void loop() {
       }
     }
   } else {
+    delay(DEFAULT_DELAY);
     if (my_fish.current_state == my_fish.MOVE_FORWARD) {
       Serial.println("Moving forward...");
       Serial.flush();
