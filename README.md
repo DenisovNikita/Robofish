@@ -2,7 +2,7 @@
 
 Idea of this project is robot-fish which can moves using servomotors which controlled via bluetooth by arduino nano
 
-I am used [Compas-3d](https://kompas.ru/) for 3d modeling my RoboFish. Here what I got
+I am used [Kompas-3d](https://kompas.ru/) for 3d modeling my RoboFish. Here what I got
 
 ![](RoboFish.jpg)
 
