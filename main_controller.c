@@ -11,6 +11,7 @@ struct Robo_fish {
     MOVE_FORWARD,
     MOVE_LEFT,
     MOVE_RIGHT,
+    STOP,
   };
 
   static const int NUM_SERVOS = 3;
@@ -31,8 +32,8 @@ struct Robo_fish {
   };
   const int BIG_DELTA[NUM_SERVOS] = {
     20, 
-    40, 
-    60,
+    30, 
+    45,
   };
   const int MIN_BORDERS_FORWARD[NUM_SERVOS] = {
     CENTER[0] - DEFAULT_DELTA[0],
@@ -68,7 +69,7 @@ struct Robo_fish {
   Servo servo[NUM_SERVOS];
   int pos[NUM_SERVOS];
 
-  int current_state = MOVE_FORWARD;
+  int current_state = STOP;
 
   void modify_state(int input) {
     if (input == 'F') {
@@ -77,6 +78,8 @@ struct Robo_fish {
       current_state = MOVE_LEFT;
     } else if (input == 'R') {
       current_state = MOVE_RIGHT;
+    } else if (input == 'S') {
+      current_state = STOP;
     } else {
       assert(0);
     }
@@ -108,16 +111,23 @@ struct Robo_fish {
       rotate(&servo[i], &pos[i], MIN_BORDERS_RIGHT[i], MAX_BORDERS_RIGHT[i]);
     }
   }
+
+  void move_stop() {
+    for (int i = 0; i < NUM_SERVOS; i++) {
+      servo[i].write(CENTER[i]);
+    }
+  }
 };
 
 Robo_fish my_fish;
-const char SIMPLE_GREETINGS[] = "F, L or R accepts";
-const char GREETINGS[] = "Type 'F' for move forward, 'L' for move left and 'R' for move right";
+const char SIMPLE_GREETINGS[] = "F, L, R or S accepts";
+const char GREETINGS[] = "Type 'F' for move forward, 'L' for move left, 'R' for move right ans 'S' for stop moving";
 
 int is_correct_input(int input) {
   return input == 'F' || 
          input == 'L' ||
-         input == 'R';
+         input == 'R' || 
+         input == 'S';
 }
 
 void setup() {
@@ -142,7 +152,7 @@ void loop() {
   my_fish.servo[1].write(rotat); // 96 is center
   my_fish.servo[2].write(rotat); // 88 is center
   return;
-#endif SETTING
+#endif
   if (Serial.available()) {
     int input = Serial.read();
     if (input != 10) { // enter button
@@ -170,7 +180,11 @@ void loop() {
       Serial.println("Moving right...");
       Serial.flush();
       my_fish.move_right();
-    } else {
+    } else if (my_fish.current_state == my_fish.STOP) {
+      Serial.println("Stopped...");
+      Serial.flush();
+      my_fish.move_stop();
+    }else {
       assert(0);
     }
   }
